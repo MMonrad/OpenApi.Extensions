@@ -173,6 +173,18 @@ public static class OpenApiOptionsExtensions
     }
 
     /// <summary>
+    /// Adds a document transformer to set a global title for the OpenAPI document.
+    /// </summary>
+    /// <param name="options">The OpenAPI options to configure.</param>
+    /// <param name="title">The title to apply to the OpenAPI document.</param>
+    /// <returns>The updated <see cref="OpenApiOptions"/> instance.</returns>
+    public static OpenApiOptions AddTitle(this OpenApiOptions options, string title)
+    {
+        options.AddDocumentTransformer(new TitleDocumentTransform(title));
+        return options;
+    }
+
+    /// <summary>
     /// Adds a schema transformer to configure OpenAPI schema for a specific type.
     /// </summary>
     /// <typeparam name="TConcrete">The type to be transformed in the OpenAPI schema.</typeparam>
