@@ -202,7 +202,7 @@ public static class OpenApiOptionsExtensions
                 return Task.CompletedTask;
             }
 
-            schema.Type = typeof(TConcrete).Name;
+            schema.Type = GetTypeName<TConcrete>();
             schema.Example = new OpenApiString(FormatJson(Activator.CreateInstance<TConcrete>(), jsonSerializerOptions));
             schema.Annotations.Clear();
 
@@ -231,7 +231,7 @@ public static class OpenApiOptionsExtensions
                 return Task.CompletedTask;
             }
 
-            schema.Type = typeof(TType).Name;
+            schema.Type = GetTypeName<TType>();
             schema.Example = new OpenApiString(FormatJson(Activator.CreateInstance<TConcrete>(), jsonSerializerOptions));
             schema.Annotations.Clear();
 
@@ -260,7 +260,7 @@ public static class OpenApiOptionsExtensions
                 return Task.CompletedTask;
             }
 
-            schema.Type = typeof(TConcrete).Name;
+            schema.Type = GetTypeName<TConcrete>();
             schema.Format = format;
             schema.Example = new OpenApiString(FormatJson(Activator.CreateInstance<TConcrete>(), jsonSerializerOptions));
             schema.Annotations.Clear();
@@ -291,7 +291,7 @@ public static class OpenApiOptionsExtensions
                 return Task.CompletedTask;
             }
 
-            schema.Type = typeof(TType).Name;
+            schema.Type = GetTypeName<TType>();
             schema.Format = format;
             schema.Example = new OpenApiString(FormatJson(Activator.CreateInstance<TConcrete>(), jsonSerializerOptions));
             schema.Annotations.Clear();
@@ -325,7 +325,7 @@ public static class OpenApiOptionsExtensions
                 return Task.CompletedTask;
             }
 
-            schema.Type = typeof(TConcrete).Name;
+            schema.Type = GetTypeName<TConcrete>();
             schema.Format = format;
             schema.Example = new OpenApiString(FormatJson(example, jsonSerializerOptions));
             schema.Annotations.Clear();
@@ -360,7 +360,7 @@ public static class OpenApiOptionsExtensions
                 return Task.CompletedTask;
             }
 
-            schema.Type = typeof(TType).Name;
+            schema.Type = GetTypeName<TType>();
             schema.Format = format;
             schema.Example = new OpenApiString(FormatJson(example, jsonSerializerOptions));
 
@@ -398,7 +398,7 @@ public static class OpenApiOptionsExtensions
                 return Task.CompletedTask;
             }
 
-            schema.Type = typeof(TType).Name;
+            schema.Type = GetTypeName<TType>();
             schema.Format = format;
             schema.Example = new OpenApiString(FormatJson(example, jsonSerializerOptions));
             schema.Description = description;
@@ -433,7 +433,7 @@ public static class OpenApiOptionsExtensions
                 return Task.CompletedTask;
             }
 
-            schema.Type = typeof(TType).Name;
+            schema.Type = GetTypeName<TType>();
             schema.Example = new OpenApiString(FormatJson(example, jsonSerializerOptions));
             schema.Annotations.Clear();
 
@@ -467,7 +467,7 @@ public static class OpenApiOptionsExtensions
                 return Task.CompletedTask;
             }
 
-            schema.Type = typeof(TType).Name;
+            schema.Type = GetTypeName<TType>();
             schema.Example = new OpenApiString(FormatJson(example, jsonSerializerOptions));
             schema.Properties = properties ?? new Dictionary<string, OpenApiSchema>();
             schema.Annotations.Clear();
@@ -494,5 +494,15 @@ public static class OpenApiOptionsExtensions
         var jsonType = context.JsonTypeInfo.Type;
         var type = Nullable.GetUnderlyingType(jsonType) ?? jsonType;
         return type == typeof(T);
+    }
+
+    private static string GetTypeName<T>()
+    {
+        if (typeof(T) == typeof(string))
+        {
+            return "string";
+        }
+
+        return typeof(T).Name;
     }
 }
