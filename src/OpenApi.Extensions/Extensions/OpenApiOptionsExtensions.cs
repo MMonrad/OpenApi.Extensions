@@ -197,7 +197,7 @@ public static class OpenApiOptionsExtensions
 
         options.AddSchemaTransformer((schema, context, _) =>
         {
-            if (context.JsonTypeInfo.Type != typeof(TConcrete))
+            if (!ShouldTransform<TConcrete>(context))
             {
                 return Task.CompletedTask;
             }
@@ -226,7 +226,7 @@ public static class OpenApiOptionsExtensions
 
         options.AddSchemaTransformer((schema, context, _) =>
         {
-            if (context.JsonTypeInfo.Type != typeof(TConcrete))
+            if (!ShouldTransform<TConcrete>(context))
             {
                 return Task.CompletedTask;
             }
@@ -255,7 +255,7 @@ public static class OpenApiOptionsExtensions
 
         options.AddSchemaTransformer((schema, context, _) =>
         {
-            if (context.JsonTypeInfo.Type != typeof(TConcrete))
+            if (!ShouldTransform<TConcrete>(context))
             {
                 return Task.CompletedTask;
             }
@@ -286,7 +286,7 @@ public static class OpenApiOptionsExtensions
 
         options.AddSchemaTransformer((schema, context, _) =>
         {
-            if (context.JsonTypeInfo.Type != typeof(TConcrete))
+            if (!ShouldTransform<TConcrete>(context))
             {
                 return Task.CompletedTask;
             }
@@ -320,7 +320,7 @@ public static class OpenApiOptionsExtensions
 
         options.AddSchemaTransformer((schema, context, _) =>
         {
-            if (context.JsonTypeInfo.Type != typeof(TConcrete))
+            if (!ShouldTransform<TConcrete>(context))
             {
                 return Task.CompletedTask;
             }
@@ -355,7 +355,7 @@ public static class OpenApiOptionsExtensions
 
         options.AddSchemaTransformer((schema, context, _) =>
         {
-            if (context.JsonTypeInfo.Type != typeof(TConcrete))
+            if (!ShouldTransform<TConcrete>(context))
             {
                 return Task.CompletedTask;
             }
@@ -393,7 +393,7 @@ public static class OpenApiOptionsExtensions
 
         options.AddSchemaTransformer((schema, context, _) =>
         {
-            if (context.JsonTypeInfo.Type != typeof(TConcrete))
+            if (!ShouldTransform<TConcrete>(context))
             {
                 return Task.CompletedTask;
             }
@@ -428,7 +428,7 @@ public static class OpenApiOptionsExtensions
 
         options.AddSchemaTransformer((schema, context, _) =>
         {
-            if (context.JsonTypeInfo.Type != typeof(TConcrete))
+            if (!ShouldTransform<TConcrete>(context))
             {
                 return Task.CompletedTask;
             }
@@ -462,7 +462,7 @@ public static class OpenApiOptionsExtensions
 
         options.AddSchemaTransformer((schema, context, _) =>
         {
-            if (context.JsonTypeInfo.Type != typeof(TConcrete))
+            if (!ShouldTransform<TConcrete>(context))
             {
                 return Task.CompletedTask;
             }
@@ -487,5 +487,12 @@ public static class OpenApiOptionsExtensions
         }
 
         return formatToJson;
+    }
+
+    private static bool ShouldTransform<T>(OpenApiSchemaTransformerContext context)
+    {
+        var jsonType = context.JsonTypeInfo.Type;
+        var type = Nullable.GetUnderlyingType(jsonType) ?? jsonType;
+        return type == typeof(T);
     }
 }
