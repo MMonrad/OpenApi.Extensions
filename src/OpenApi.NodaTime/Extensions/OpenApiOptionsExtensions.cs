@@ -45,8 +45,8 @@ public static class OpenApiOptionsExtensions
         options.AddSchemaTransformer(new IntervalSchemaTransformer(instant, jsonSerializerOptions));
         options.AddSchemaTransformer(new DateIntervalSchemaTransformer(instant, dateTimeZoneProvider.GetSystemDefault(), jsonSerializerOptions));
         options.AddType<Offset, string>(zoned.Offset, null, jsonSerializerOptions);
-        options.AddType<Period, string>(period, null, jsonSerializerOptions);
-        options.AddType<Duration, string>("duration", interval.Duration, "An elapsed time measured in nanoseconds, mapped to ISO 8601 duration.", null, jsonSerializerOptions);
+        options.AddType<Period, string>("duration", period, null, null, jsonSerializerOptions);
+        options.AddType<Duration, string>("string", interval.Duration, "An elapsed time measured in nanoseconds, mapped to 25:01:01.001.", null, jsonSerializerOptions);
         options.AddType<DateTimeZone, string>(dateTimeZoneProvider.GetSystemDefault(), null, jsonSerializerOptions);
 
         return options;

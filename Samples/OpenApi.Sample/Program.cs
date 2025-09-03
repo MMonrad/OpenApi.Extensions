@@ -54,7 +54,7 @@ app.MapGet("/weatherforecast",
 
 app.Run();
 
-internal record WeatherForecast(LocalDate Date, int TemperatureC, string? Summary)
+internal record WeatherForecast(LocalDate Date, int TemperatureC, string? Summary, Period? d = null)
 {
     public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
 }
