@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.OpenApi;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using OpenApi.Extensions.Options;
+using OpenApi.Extensions.Schemas;
 using OpenApi.Extensions.Transformers;
 using OpenApi.Extensions.Transformers.Documents;
 using OpenApi.Extensions.Transformers.Operations;
@@ -42,7 +43,11 @@ public static class OpenApiOptionsExtensions
         var opt = new ImplicitFlowOptions();
         configure(opt);
 
-        options.AddDocumentTransformer(new OAuth2ImplicitFlowDocumentTransformation(opt.SecurityScheme, opt.TokenEndpoint, opt.AuthorizationEndpoint, opt.Description, opt.Scopes));
+        options.AddDocumentTransformer(new OAuth2ImplicitFlowDocumentTransformation(opt.SecurityScheme,
+            opt.TokenEndpoint,
+            opt.AuthorizationEndpoint,
+            opt.Description,
+            opt.Scopes));
         return options;
     }
 
@@ -492,6 +497,17 @@ public static class OpenApiOptionsExtensions
             return Task.CompletedTask;
         });
 
+        return options;
+    }
+
+    /// <summary>
+    /// Instructs the generator to represent all enum values as strings rather than their numeric values in the generated OpenAPI specification.
+    /// </summary>
+    /// <param name="options">The OpenAPI options to configure.</param>
+    /// <returns>The updated <see cref="OpenApiOptions"/> instance.</returns>
+    public static OpenApiOptions DescribeAllEnumsAsStrings(this OpenApiOptions options)
+    {
+        options.AddSchemaTransformer<DescribeAllEnumsAsStringsSchemaTransformation>();
         return options;
     }
 
