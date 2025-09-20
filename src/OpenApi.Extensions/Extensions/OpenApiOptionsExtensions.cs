@@ -7,7 +7,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
+using OpenApi.Extensions.Options;
 using OpenApi.Extensions.Transformers;
+using OpenApi.Extensions.Transformers.Documents;
 using OpenApi.Extensions.Transformers.Operations;
 
 namespace OpenApi.Extensions.Extensions;
@@ -26,6 +28,21 @@ public static class OpenApiOptionsExtensions
     public static OpenApiOptions AddDescription(this OpenApiOptions options, string description)
     {
         options.AddDocumentTransformer(new DescriptionDocumentTransform(description));
+        return options;
+    }
+
+    /// <summary>
+    /// Adds a document transformer to configure OAuth2 Implicit Flow.
+    /// </summary>
+    /// <param name="options">The OpenAPI options to configure.</param>
+    /// <param name="configure"></param>
+    /// <returns>The updated <see cref="OpenApiOptions"/> instance.</returns>
+    public static OpenApiOptions AddOAuth2ImplicitFlow(this OpenApiOptions options, Action<ImplicitFlowOptions> configure)
+    {
+        var opt = new ImplicitFlowOptions();
+        configure(opt);
+
+        options.AddDocumentTransformer(new OAuth2ImplicitFlowDocumentTransformation(opt.SecurityScheme, opt.TokenEndpoint, opt.AuthorizationEndpoint, opt.Description, opt.Scopes));
         return options;
     }
 
@@ -489,13 +506,6 @@ public static class OpenApiOptionsExtensions
         return formatToJson;
     }
 
-    private static bool ShouldTransform<T>(OpenApiSchemaTransformerContext context)
-    {
-        var jsonType = context.JsonTypeInfo.Type;
-        var type = Nullable.GetUnderlyingType(jsonType) ?? jsonType;
-        return type == typeof(T);
-    }
-
     private static string GetTypeName<T>()
     {
         if (typeof(T) == typeof(string))
@@ -504,5 +514,12 @@ public static class OpenApiOptionsExtensions
         }
 
         return typeof(T).Name;
+    }
+
+    private static bool ShouldTransform<T>(OpenApiSchemaTransformerContext context)
+    {
+        var jsonType = context.JsonTypeInfo.Type;
+        var type = Nullable.GetUnderlyingType(jsonType) ?? jsonType;
+        return type == typeof(T);
     }
 }
