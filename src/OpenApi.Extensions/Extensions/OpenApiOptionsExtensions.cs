@@ -5,8 +5,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.OpenApi;
-using Microsoft.OpenApi.Any;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using OpenApi.Extensions.Options;
 using OpenApi.Extensions.Schemas;
 using OpenApi.Extensions.Transformers;
@@ -138,6 +137,7 @@ public static class OpenApiOptionsExtensions
             var securityScheme = new OpenApiSecurityScheme();
             await asyncFactory(securityScheme, context.ApplicationServices, cancellationToken);
             document.Components ??= new OpenApiComponents();
+            document.Components.SecuritySchemes ??= new Dictionary<string, IOpenApiSecurityScheme>();
             document.Components.SecuritySchemes.Add(schemeName, securityScheme);
         });
 
@@ -146,11 +146,7 @@ public static class OpenApiOptionsExtensions
             var hasAuthorization = await context.HasAuthorizationAsync();
             if (hasAuthorization)
             {
-                var referenceScheme = new OpenApiSecurityScheme
-                {
-                    Reference = new OpenApiReference
-                        { Id = schemeName, Type = ReferenceType.SecurityScheme }
-                };
+                var referenceScheme = new OpenApiSecuritySchemeReference(schemeName, new OpenApiDocument());
                 operation.Security ??= [];
                 operation.Security.Add(new OpenApiSecurityRequirement
                 {
@@ -171,6 +167,7 @@ public static class OpenApiOptionsExtensions
     {
         options.AddDocumentTransformer((document, _, _) =>
         {
+            document.Servers ??= new List<OpenApiServer>();
             document.Servers.Add(new OpenApiServer
             {
                 Url = server,
@@ -225,8 +222,7 @@ public static class OpenApiOptionsExtensions
             }
 
             schema.Type = GetTypeName<TConcrete>();
-            schema.Example = new OpenApiString(FormatJson(Activator.CreateInstance<TConcrete>(), jsonSerializerOptions));
-            schema.Annotations.Clear();
+            schema.Example = FormatJson(Activator.CreateInstance<TConcrete>(), jsonSerializerOptions);
 
             return Task.CompletedTask;
         });
@@ -254,8 +250,7 @@ public static class OpenApiOptionsExtensions
             }
 
             schema.Type = GetTypeName<TType>();
-            schema.Example = new OpenApiString(FormatJson(Activator.CreateInstance<TConcrete>(), jsonSerializerOptions));
-            schema.Annotations.Clear();
+            schema.Example = FormatJson(Activator.CreateInstance<TConcrete>(), jsonSerializerOptions);
 
             return Task.CompletedTask;
         });
@@ -284,8 +279,7 @@ public static class OpenApiOptionsExtensions
 
             schema.Type = GetTypeName<TConcrete>();
             schema.Format = format;
-            schema.Example = new OpenApiString(FormatJson(Activator.CreateInstance<TConcrete>(), jsonSerializerOptions));
-            schema.Annotations.Clear();
+            schema.Example = FormatJson(Activator.CreateInstance<TConcrete>(), jsonSerializerOptions);
 
             return Task.CompletedTask;
         });
@@ -315,8 +309,7 @@ public static class OpenApiOptionsExtensions
 
             schema.Type = GetTypeName<TType>();
             schema.Format = format;
-            schema.Example = new OpenApiString(FormatJson(Activator.CreateInstance<TConcrete>(), jsonSerializerOptions));
-            schema.Annotations.Clear();
+            schema.Example = FormatJson(Activator.CreateInstance<TConcrete>(), jsonSerializerOptions);
 
             return Task.CompletedTask;
         });
@@ -349,8 +342,7 @@ public static class OpenApiOptionsExtensions
 
             schema.Type = GetTypeName<TConcrete>();
             schema.Format = format;
-            schema.Example = new OpenApiString(FormatJson(example, jsonSerializerOptions));
-            schema.Annotations.Clear();
+            schema.Example = FormatJson(example, jsonSerializerOptions);
 
             return Task.CompletedTask;
         });
@@ -384,7 +376,7 @@ public static class OpenApiOptionsExtensions
 
             schema.Type = GetTypeName<TType>();
             schema.Format = format;
-            schema.Example = new OpenApiString(FormatJson(example, jsonSerializerOptions));
+            schema.Example = FormatJson(example, jsonSerializerOptions);
 
             return Task.CompletedTask;
         });
@@ -408,7 +400,7 @@ public static class OpenApiOptionsExtensions
         string format,
         TConcrete example,
         string? description = null,
-        IDictionary<string, OpenApiSchema>? properties = null,
+        IDictionary<string, IOpenApiSchema>? properties = null,
         JsonSerializerOptions? jsonSerializerOptions = null)
     {
         jsonSerializerOptions ??= new JsonSerializerOptions();
@@ -422,10 +414,9 @@ public static class OpenApiOptionsExtensions
 
             schema.Type = GetTypeName<TType>();
             schema.Format = format;
-            schema.Example = new OpenApiString(FormatJson(example, jsonSerializerOptions));
+            schema.Example = FormatJson(example, jsonSerializerOptions);
             schema.Description = description;
-            schema.Properties = properties ?? new Dictionary<string, OpenApiSchema>();
-            schema.Annotations.Clear();
+            schema.Properties = properties ?? new Dictionary<string, IOpenApiSchema>();
 
             return Task.CompletedTask;
         });
@@ -456,8 +447,7 @@ public static class OpenApiOptionsExtensions
             }
 
             schema.Type = GetTypeName<TType>();
-            schema.Example = new OpenApiString(FormatJson(example, jsonSerializerOptions));
-            schema.Annotations.Clear();
+            schema.Example = FormatJson(example, jsonSerializerOptions);
 
             return Task.CompletedTask;
         });
@@ -477,7 +467,7 @@ public static class OpenApiOptionsExtensions
     /// <returns>The updated <see cref="OpenApiOptions"/> instance.</returns>
     public static OpenApiOptions AddType<TConcrete, TType>(this OpenApiOptions options,
         TConcrete example,
-        IDictionary<string, OpenApiSchema>? properties = null,
+        IDictionary<string, IOpenApiSchema>? properties = null,
         JsonSerializerOptions? jsonSerializerOptions = null)
     {
         jsonSerializerOptions ??= new JsonSerializerOptions();
@@ -490,9 +480,8 @@ public static class OpenApiOptionsExtensions
             }
 
             schema.Type = GetTypeName<TType>();
-            schema.Example = new OpenApiString(FormatJson(example, jsonSerializerOptions));
-            schema.Properties = properties ?? new Dictionary<string, OpenApiSchema>();
-            schema.Annotations.Clear();
+            schema.Example = FormatJson(example, jsonSerializerOptions);
+            schema.Properties = properties ?? new Dictionary<string, IOpenApiSchema>();
 
             return Task.CompletedTask;
         });
@@ -522,14 +511,14 @@ public static class OpenApiOptionsExtensions
         return formatToJson;
     }
 
-    private static string GetTypeName<T>()
+    private static JsonSchemaType GetTypeName<T>()
     {
         if (typeof(T) == typeof(string))
         {
-            return "string";
+            return JsonSchemaType.String;
         }
 
-        return typeof(T).Name;
+        return JsonSchemaType.Object;
     }
 
     private static bool ShouldTransform<T>(OpenApiSchemaTransformerContext context)

@@ -4,7 +4,7 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.OpenApi;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 
 namespace OpenApi.Extensions.Transformers.Operations;
 
@@ -22,6 +22,7 @@ public class StatusCodeOperationTransform : IOpenApiOperationTransformer
     public Task TransformAsync(OpenApiOperation operation, OpenApiOperationTransformerContext context, CancellationToken cancellationToken)
     {
         var statusCode = Convert.ToInt32(_statusCode);
+        operation.Responses ??= new OpenApiResponses();
         if (operation.Responses.ContainsKey(statusCode.ToString()))
         {
             return Task.CompletedTask;
@@ -46,6 +47,7 @@ public class StatusCodeOperationTransform<T> : IOpenApiOperationTransformer
     public Task TransformAsync(OpenApiOperation operation, OpenApiOperationTransformerContext context, CancellationToken cancellationToken)
     {
         var statusCode = Convert.ToInt32(_statusCode);
+        operation.Responses ??= new OpenApiResponses();
         if (operation.Responses.ContainsKey(statusCode.ToString()))
         {
             return Task.CompletedTask;
@@ -56,7 +58,7 @@ public class StatusCodeOperationTransform<T> : IOpenApiOperationTransformer
             {
                 Description = _description,
                 Content = new Dictionary<string, OpenApiMediaType>
-                    { { "application/Json", new OpenApiMediaType { Schema = new OpenApiSchema { Type = typeof(T).Name } } } }
+                    { { "application/Json", new OpenApiMediaType { Schema = new OpenApiSchema { Description = typeof(T).Name } } } }
             });
         return Task.CompletedTask;
     }
