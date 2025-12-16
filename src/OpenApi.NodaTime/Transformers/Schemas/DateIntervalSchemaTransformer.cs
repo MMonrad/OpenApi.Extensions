@@ -4,9 +4,9 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.OpenApi;
-using Microsoft.OpenApi.Any;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using NodaTime;
+using OpenApiSchema = Microsoft.OpenApi.OpenApiSchema;
 
 namespace OpenApi.NodaTime.Transformers.Schemas;
 
@@ -33,26 +33,26 @@ public class DateIntervalSchemaTransformer : IOpenApiSchemaTransformer
         var zoned = _instant.InZone(_dateTimeZone);
         var dateInterval = new DateInterval(zoned.Date, zoned.Date.PlusDays(1));
 
-        schema.Type = "object";
+        schema.Type = JsonSchemaType.Object;
         schema.Format = "A date interval between two LocalDate values, expressed with start and end.";
-        schema.Properties = new Dictionary<string, OpenApiSchema>
+        schema.Properties = new Dictionary<string, IOpenApiSchema>
                             {
                                 {
                                     nameof(DateInterval.Start),
                                     new OpenApiSchema
                                     {
-                                        Type = "string",
+                                        Type = JsonSchemaType.String,
                                         Format = "date",
-                                        Example = new OpenApiString(FormatJson(dateInterval.Start))
+                                        Example = FormatJson(dateInterval.Start)
                                     }
                                 },
                                 {
                                     nameof(DateInterval.End),
                                     new OpenApiSchema
                                     {
-                                        Type = "string",
+                                        Type = JsonSchemaType.String,
                                         Format = "date",
-                                        Example = new OpenApiString(FormatJson(dateInterval.End))
+                                        Example = FormatJson(dateInterval.End)
                                     }
                                 }
                             };

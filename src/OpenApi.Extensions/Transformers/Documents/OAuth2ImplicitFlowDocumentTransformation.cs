@@ -1,9 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.OpenApi;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 
 namespace OpenApi.Extensions.Transformers.Documents;
 
@@ -31,6 +32,7 @@ public class OAuth2ImplicitFlowDocumentTransformation : IOpenApiDocumentTransfor
     public Task TransformAsync(OpenApiDocument document, OpenApiDocumentTransformerContext context, CancellationToken cancellationToken)
     {
         document.Components ??= new OpenApiComponents();
+        document.Components.SecuritySchemes ??= new Dictionary<string, IOpenApiSecurityScheme>();
         document.Components.SecuritySchemes[_securityScheme] =
             new OpenApiSecurityScheme
             {
@@ -49,22 +51,24 @@ public class OAuth2ImplicitFlowDocumentTransformation : IOpenApiDocumentTransfor
                 }
             };
 
-        document.SecurityRequirements.Add(
-            new OpenApiSecurityRequirement
-            {
-                {
-                    new OpenApiSecurityScheme
-                    {
-                        Reference = new OpenApiReference
-                        {
-                            Type = ReferenceType
-                                .SecurityScheme,
-                            Id = _securityScheme,
-                        }
-                    },
-                    _scopes
-                }
-            });
+        // document.SecurityRequirements.Add(
+        //     new OpenApiSecurityRequirement
+#pragma warning disable S125
+        //     {
+#pragma warning restore S125
+        //         {
+        //             new OpenApiSecurityScheme
+        //             {
+        //                 Reference = new OpenApiReference
+        //                 {
+        //                     Type = ReferenceType
+        //                         .SecurityScheme,
+        //                     Id = _securityScheme,
+        //                 }
+        //             },
+        //             _scopes
+        //         }
+        //     });
 
         return Task.CompletedTask;
     }

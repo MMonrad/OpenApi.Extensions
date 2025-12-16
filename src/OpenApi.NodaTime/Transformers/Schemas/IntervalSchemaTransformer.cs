@@ -4,8 +4,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.OpenApi;
-using Microsoft.OpenApi.Any;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using NodaTime;
 
 namespace OpenApi.NodaTime.Transformers.Schemas;
@@ -35,26 +34,26 @@ public class IntervalSchemaTransformer : IOpenApiSchemaTransformer
                                             .PlusTicks(TimeSpan.TicksPerSecond)
                                             .PlusTicks(TimeSpan.TicksPerMillisecond));
 
-        schema.Type = "object";
+        schema.Type = JsonSchemaType.Object;
         schema.Description = "Represents a time interval between two Instant values, expressed with start and end.";
-        schema.Properties = new Dictionary<string, OpenApiSchema>
+        schema.Properties = new Dictionary<string, IOpenApiSchema>
                             {
                                 {
                                     nameof(Interval.Start),
                                     new OpenApiSchema
                                     {
-                                        Type = "string",
+                                        Type = JsonSchemaType.String,
                                         Format = "date-time",
-                                        Example = new OpenApiString(FormatJson(interval.Start))
+                                        Example = FormatJson(interval.Start)
                                     }
                                 },
                                 {
                                     nameof(Interval.End),
                                     new OpenApiSchema
                                     {
-                                        Type = "string",
+                                        Type = JsonSchemaType.String,
                                         Format = "date-time",
-                                        Example = new OpenApiString(FormatJson(interval.End))
+                                        Example = FormatJson(interval.End)
                                     }
                                 }
                             };
